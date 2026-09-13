@@ -1,0 +1,7 @@
+.tmp/
+*.tmp
+Thumbs.db
+.DS_Store
+.env
+credentials.json
+token.json
