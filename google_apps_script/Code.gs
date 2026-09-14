@@ -241,6 +241,13 @@ function doPost(e) {
     // into an error response for the app.
     if (body.action === "leftover") {
       try {
+        // Apps Script batches sheet writes and can apply them lazily;
+        // emailReport() fetches the spreadsheet's persisted export URL
+        // (not this execution's in-memory state), so without flush()
+        // the items just written above could still be missing from the
+        // emailed file. flush() blocks until every pending write above
+        // is actually committed to the stored spreadsheet.
+        SpreadsheetApp.flush();
         emailReport(ss);
       } catch (mailErr) {
         Logger.log("Failed to email report: " + mailErr);
@@ -362,6 +369,9 @@ function handleSoldOut(body) {
   }
 
   try {
+    // See the matching comment in doPost(): force the writes above to be
+    // committed to the persisted spreadsheet before exporting/emailing it.
+    SpreadsheetApp.flush();
     emailReport(ss);
   } catch (mailErr) {
     Logger.log("Failed to email report: " + mailErr);
