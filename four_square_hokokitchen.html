@@ -604,7 +604,7 @@
     saveBtn.onclick = function(){
       if(syncKey){ syncToSheet(syncKey, syncDate, entries); }
       // "leftover" backs both 6:30 PM Summary (Mon-Sat) and 6:00 PM
-      // Summary (Sunday) â€” those checkpoints also email the report.
+      // Summary (Sunday) — those checkpoints also email the report.
       var message = (syncKey === "leftover")
         ? "Successfully saved and the report has been sent."
         : "Successfully Save";
@@ -699,15 +699,15 @@
 
   function syncToSheet(action, date, entries){
     if(!APPS_SCRIPT_URL){
-      if(window.console){ console.warn("[hoko] APPS_SCRIPT_URL is blank â€” skipping sheet sync."); }
+      if(window.console){ console.warn("[hoko] APPS_SCRIPT_URL is blank — skipping sheet sync."); }
       return;
     }
     if(!entries.length){
-      if(window.console){ console.warn("[hoko] No food rows have a qty > 0 â€” sending an empty items list, sheet will not change."); }
+      if(window.console){ console.warn("[hoko] No food rows have a qty > 0 — sending an empty items list, sheet will not change."); }
     }
     var payload = {
       action: action, // "start" | "remaining" | "leftover"
-      date: pad(date.getDate()) + "/" + pad(date.getMonth()+1) + "/" + date.getFullYear(), // dd/mm/yyyy â€” must match DATE_FORMAT in Code.gs
+      date: pad(date.getDate()) + "/" + pad(date.getMonth()+1) + "/" + date.getFullYear(), // dd/mm/yyyy — must match DATE_FORMAT in Code.gs
       items: entries
     };
     if(window.console){ console.log("[hoko] syncing to sheet:", payload); }
@@ -739,13 +739,13 @@
   }
 
   // Unlike the other sync calls (fire-and-forget via mode:"no-cors"), this
-  // one needs to read the server's answer back â€” Code.gs checks Start_day
+  // one needs to read the server's answer back — Code.gs checks Start_day
   // first and, if nothing was started today, returns { ok:false, code:
   // "NO_START_DAY" } instead of touching Remaining_Foods/Leftover_Foods,
   // so the app needs the actual response to know which alert to show.
   function syncSoldOut(dateStr){
     if(!APPS_SCRIPT_URL){
-      window.alert("Sheet sync isn't configured (APPS_SCRIPT_URL is blank) â€” cannot check Start_day.");
+      window.alert("Sheet sync isn't configured (APPS_SCRIPT_URL is blank) — cannot check Start_day.");
       return;
     }
     var payload = { action: "soldOut", date: dateStr };
@@ -802,7 +802,7 @@
 
   function syncNewFoodItem(name){
     if(!APPS_SCRIPT_URL){
-      if(window.console){ console.warn("[hoko] APPS_SCRIPT_URL is blank â€” new item not synced to sheet."); }
+      if(window.console){ console.warn("[hoko] APPS_SCRIPT_URL is blank — new item not synced to sheet."); }
       return;
     }
     var payload = { action: "addFoodItem", food: name };
