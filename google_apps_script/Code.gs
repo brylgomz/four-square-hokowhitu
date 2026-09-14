@@ -19,7 +19,7 @@
 var DRIVE_FOLDER_ID = "1s1UxVhOK8pZvUmAwdMQY9Q8q3VEAKPhA"; // Foursquare_Hokowhitu
 var SPREADSHEET_NAME = "hoko_kitchen";
 var DATE_FORMAT = "dd/MM/yyyy"; // must match the date format the app sends
-var REPORT_EMAIL = "ryll_bullets@yahoo.com"; // recipient for the end-of-day leftover report
+var REPORT_EMAIL = "Maria.barkla@4sq.co.nz"; // recipient for the end-of-day leftover report
 
 var FOOD_LIST = [
   "Bacon & Egg Pies","Cheeseburger Pies","Chicken Cranberry & Brie Pies",
