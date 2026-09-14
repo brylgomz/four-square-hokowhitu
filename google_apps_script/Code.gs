@@ -274,8 +274,12 @@ function emailReport(ss) {
   var response = UrlFetchApp.fetch(url, {
     headers: { Authorization: "Bearer " + ScriptApp.getOAuthToken() }
   });
-  var blob = response.getBlob().setName(SPREADSHEET_NAME + ".xlsx");
-  var todayStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), DATE_FORMAT);
+  var tz = Session.getScriptTimeZone();
+  var todayStr = Utilities.formatDate(new Date(), tz, DATE_FORMAT);
+  // "/" isn't valid in a filename, so the attachment uses the same
+  // dd-MM-yyyy digit order with dashes instead of slashes.
+  var todayFileStr = Utilities.formatDate(new Date(), tz, "dd-MM-yyyy");
+  var blob = response.getBlob().setName("Foursquare_kitchen_report_" + todayFileStr + ".xlsx");
   MailApp.sendEmail({
     to: REPORT_EMAIL,
     subject: "Hot Cabinet Report – " + todayStr,
