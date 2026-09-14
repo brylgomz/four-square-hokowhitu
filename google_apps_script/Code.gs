@@ -283,7 +283,7 @@ function emailReport(ss) {
   MailApp.sendEmail({
     to: REPORT_EMAIL,
     subject: "Hot Cabinet Report – " + todayStr,
-    body: "Hi Maria,\n\nPlease find attached the Hot Cabinet Report Tracker for today.\n\nThank you,\nFour Square Hokowhitu – Kitchen",
+    body: "Hi Maria,\n\nPlease find the attached file containing today’s Hot Cabinet Report Tracker.\n\nThank you,\nFour Square Hokowhitu – Kitchen",
     attachments: [blob]
   });
 }
