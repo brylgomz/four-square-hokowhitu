@@ -275,10 +275,11 @@ function emailReport(ss) {
     headers: { Authorization: "Bearer " + ScriptApp.getOAuthToken() }
   });
   var blob = response.getBlob().setName(SPREADSHEET_NAME + ".xlsx");
+  var todayStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), DATE_FORMAT);
   MailApp.sendEmail({
     to: REPORT_EMAIL,
-    subject: SPREADSHEET_NAME + " Report",
-    body: "Hi, Please see attached file for the report",
+    subject: "Hot Cabinet Report – " + todayStr,
+    body: "Hi Maria,\n\nPlease find attached the Hot Cabinet Report Tracker for today.\n\nThank you,\nFour Square Hokowhitu – Kitchen",
     attachments: [blob]
   });
 }
