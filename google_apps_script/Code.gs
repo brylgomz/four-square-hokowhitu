@@ -8,7 +8,7 @@
  *      Drive folder, with 4 tabs: Food_List, Start_day, Remaining_Foods, Leftover_Foods.
  *   3. Deploy > New deployment > type "Web app". Execute as "Me", access "Anyone".
  *   4. Copy the /exec URL it gives you and paste it into APPS_SCRIPT_URL at the
- *      top of the <script> block in four_square_hokowhitu.html.
+ *      top of the <script> block in four_square_hokokitchen.html.
  *   5. Open the /exec URL directly in a browser to confirm — it should return
  *      {"ok":true,"message":"hoko_kitchen backend is running"}.
  *      (Do not rely on automated fetch checks here — Google's bot detection
