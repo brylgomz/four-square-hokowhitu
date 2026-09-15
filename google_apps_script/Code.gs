@@ -515,6 +515,27 @@ function setupAllReports() {
   setupLeftoverFoodsReport();
 }
 
+// Run this ONCE manually (Run > createMonthlyReportTrigger) to install a
+// time-based trigger that automatically re-runs setupAllReports() at
+// ~12am on the 1st of every month, so the report tabs roll over to the
+// new month on their own — without this, buildDailyTotalReport only
+// picks up the current month whenever someone happens to run it.
+// Safe to run more than once: it clears any existing copy of this
+// trigger first so duplicates never stack up.
+function createMonthlyReportTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(trigger) {
+    if (trigger.getHandlerFunction() === "setupAllReports") {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+  ScriptApp.newTrigger("setupAllReports")
+    .timeBased()
+    .onMonthDay(1)
+    .atHour(0)
+    .create();
+  Logger.log("Monthly trigger installed: setupAllReports will now run automatically on the 1st of every month.");
+}
+
 function columnToLetter(column) {
   var temp, letter = "";
   while (column > 0) {
