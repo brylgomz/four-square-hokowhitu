@@ -52,27 +52,6 @@ function setup() {
   Logger.log("Setup complete: " + ss.getUrl());
 }
 
-// One-off, non-destructive: makes sure every dish in FOOD_LIST (the same
-// 28 base dishes the app's food dropdown is built from) has a row in
-// Food_List and all three data tabs, without touching any existing
-// rows/columns/quantities — only adds rows that are missing. Safe to run
-// any time the live spreadsheet may have drifted from FOOD_LIST (e.g.
-// someone edited a tab by hand), unlike setup() which clears everything.
-function syncFoodListToTabs() {
-  var ss = getOrCreateSpreadsheet();
-  var foodListSheet = ss.getSheetByName("Food_List") || ss.insertSheet("Food_List");
-  FOOD_LIST.forEach(function(food) {
-    getOrCreateFoodRow(foodListSheet, food);
-  });
-  DATA_TABS.forEach(function(tabName) {
-    var sheet = ss.getSheetByName(tabName) || ss.insertSheet(tabName);
-    FOOD_LIST.forEach(function(food) {
-      getOrCreateFoodRow(sheet, food);
-    });
-  });
-  Logger.log("Food_List, Start_day, Remaining_Foods and Leftover_Foods are now in sync with FOOD_LIST.");
-}
-
 function getOrCreateSpreadsheet() {
   var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
   var files = folder.getFilesByName(SPREADSHEET_NAME);
