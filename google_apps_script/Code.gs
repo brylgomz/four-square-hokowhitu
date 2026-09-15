@@ -437,43 +437,53 @@ function buildDailyTotalReport(sourceTabName, reportTabName, chartTitle) {
 
   var headerDates = sourceSheet.getRange(1, 2, 1, numDates).getValues()[0];
 
+  // Only the current calendar month (as of whenever this is run) gets a
+  // row — the source tabs still hold every date through the end of 2026,
+  // this just narrows what the report/chart displays. Re-run
+  // setupAllReports at the start of a new month to roll the report over.
+  var now = new Date();
+  var currentYear = now.getFullYear();
+  var currentMonth = now.getMonth();
+
+  var reportRow = 2;
   for (var i = 0; i < numDates; i++) {
     var sourceCol = i + 2;   // source column (B, C, ...)
-    var reportRow = i + 2;   // report row (2, 3, ...)
     var colLetter = columnToLetter(sourceCol);
 
     var d = parseHeaderDate(headerDates[i]);
-    if (d) {
-      var weekdayLabel = WEEKDAY_NAMES[d.getDay()];
-      // Prefix the weekday name onto the date itself (e.g. "Monday,
-      // 14/09/2026") so it's readable directly on the chart's axis, not
-      // only implied by the bar's color/legend.
-      reportSheet.getRange(reportRow, 1).setFormula(
-        "=\"" + weekdayLabel + ", \"&" + sourceTabName + "!" + colLetter + "1"
-      );
-      var weekdayCol = d.getDay() + 2; // getDay(): 0=Sunday..6=Saturday -> col B..H
-      reportSheet.getRange(reportRow, weekdayCol).setFormula(
-        "=SUM(" + sourceTabName + "!" + colLetter + "2:" + colLetter + sumToRow + ")"
-      );
-    } else {
-      reportSheet.getRange(reportRow, 1).setFormula("=" + sourceTabName + "!" + colLetter + "1");
-    }
+    if (!d || d.getFullYear() !== currentYear || d.getMonth() !== currentMonth) { continue; }
+
+    var weekdayLabel = WEEKDAY_NAMES[d.getDay()];
+    // Prefix the weekday name onto the date itself (e.g. "Monday,
+    // 14/09/2026") so it's readable directly on the chart's axis, not
+    // only implied by the bar's color/legend.
+    reportSheet.getRange(reportRow, 1).setFormula(
+      "=\"" + weekdayLabel + ", \"&" + sourceTabName + "!" + colLetter + "1"
+    );
+    var weekdayCol = d.getDay() + 2; // getDay(): 0=Sunday..6=Saturday -> col B..H
+    reportSheet.getRange(reportRow, weekdayCol).setFormula(
+      "=SUM(" + sourceTabName + "!" + colLetter + "2:" + colLetter + sumToRow + ")"
+    );
+    reportRow++;
   }
-  reportSheet.getRange(2, 1, numDates, 1).setNumberFormat("@");
+  var numDateRows = reportRow - 2;
+
+  reportSheet.getRange(2, 1, numDateRows, 1).setNumberFormat("@");
   reportSheet.setFrozenRows(1);
   reportSheet.autoResizeColumns(1, numCols);
 
-  var dataRange = reportSheet.getRange(1, 1, numDates + 1, numCols);
+  var dataRange = reportSheet.getRange(1, 1, numDateRows + 1, numCols);
   var seriesColors = {};
   WEEKDAY_NAMES.forEach(function(day, idx) {
     seriesColors[idx] = { color: WEEKDAY_COLORS[day] };
   });
 
+  var monthLabel = Utilities.formatDate(now, tz, "MMMM yyyy");
   var chart = reportSheet.newChart()
     .asColumnChart()
     .addRange(dataRange)
     .setPosition(2, numCols + 2, 0, 0)
-    .setOption("title", chartTitle)
+    .setOption("title", chartTitle + " (" + monthLabel + ")")
     .setOption("legend", { position: "top" })
     .setOption("hAxis", { title: "Date", slantedText: true, textStyle: { fontSize: 9 } })
     .setOption("vAxis", { title: "Total Quantity", minValue: 0 })
