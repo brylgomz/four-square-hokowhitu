@@ -30,7 +30,6 @@ var FOOD_LIST = [
   "Battered Hot Dog","Cordon Bleu","Lasagne Toppa",
   "Beef & Cabbage (Springroll)","Butter Chicken (Springroll)",
   "Kransky","Kebab","DimSim","Mac&Cheese","Satay Kebab","Chicken Popcorn",
-  "Chicken Nibbles",
   "Chipotle Chicken Burrito","Nacho Beef & Cheese Burrito"
 ];
 
