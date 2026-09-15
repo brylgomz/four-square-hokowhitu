@@ -300,6 +300,7 @@
     cursor:pointer;
   }
   .modal-actions .save-link{background:var(--gold);color:var(--on-gold);border-color:var(--gold);}
+  .modal-actions .cancel-link{background:var(--muted-btn);color:var(--muted-btn-ink);border-color:var(--muted-btn);}
 </style>
 </head>
 <body>
@@ -362,6 +363,7 @@
   <div class="modal-box">
     <img id="reportImg" alt="Report preview">
     <div class="modal-actions">
+      <button type="button" class="cancel-link" id="cancelBtn">Cancel</button>
       <button type="button" class="save-link" id="saveBtn">Save</button>
     </div>
   </div>
@@ -558,11 +560,15 @@
     renderSummaryButtons();
   }
 
-  function resetForm(){
-    if(!window.confirm("Reset all entries for a new day?")){ return; }
+  function clearAllFields(){
     el("foodRows").innerHTML = "";
     addFoodRow(foodMaster[0], 0);
     renderFoodListSummary();
+  }
+
+  function resetForm(){
+    if(!window.confirm("Reset all entries for a new day?")){ return; }
+    clearAllFields();
   }
 
   // ---------- report generation ----------
@@ -609,6 +615,12 @@
         ? "Successfully saved and the report has been sent."
         : "Successfully saved";
       window.alert(message);
+      el("modalOverlay").className = "modal-overlay";
+      clearAllFields();
+    };
+
+    var cancelBtn = el("cancelBtn");
+    cancelBtn.onclick = function(){
       el("modalOverlay").className = "modal-overlay";
     };
   }
