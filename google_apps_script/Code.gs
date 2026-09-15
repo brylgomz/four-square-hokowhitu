@@ -387,15 +387,31 @@ function handleSoldOut(body) {
 
 // ---------- reporting ----------
 
-// Builds (or rebuilds) a "<source>_Report(s)" tab with a Date / Total
-// Quantity table driven entirely by live formulas that reference the
-// source tab, plus a line chart over that table. Because the cells are
-// formulas (not copied values), every quantity saved into the source tab
-// — today or any future date already in range — recalculates the totals
-// and the chart automatically; there is nothing else to sync. The SUM
-// range is padded well past the current last row so food items added
-// later via "Add Item" are picked up without re-running this.
+// Builds (or rebuilds) a "<source>_Report(s)" tab with a Date / (one
+// column per weekday) table driven entirely by live formulas that
+// reference the source tab, plus a bar chart over that table. Because the
+// cells are formulas (not copied values), every quantity saved into the
+// source tab — today or any future date already in range — recalculates
+// the totals and the chart automatically; there is nothing else to sync.
+// The SUM range is padded well past the current last row so food items
+// added later via "Add Item" are picked up without re-running this.
+//
+// Each date's total lands in ONE of the seven weekday columns (matching
+// that date's actual day of week) and is left blank in the other six —
+// that's what makes each bar render in its weekday's color below, since
+// Google's column chart colors by series/column, not by individual bar.
 var REPORT_ROW_PADDING = 200; // generous headroom for future food rows
+
+var WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+var WEEKDAY_COLORS = {
+  Sunday: "#e53935",    // Red
+  Monday: "#fb8c00",    // Orange
+  Tuesday: "#fdd835",   // Yellow
+  Wednesday: "#43a047", // Green
+  Thursday: "#1e88e5",  // Blue
+  Friday: "#3949ab",    // Indigo
+  Saturday: "#8e24aa"   // Violet
+};
 
 function buildDailyTotalReport(sourceTabName, reportTabName, chartTitle) {
   var ss = getOrCreateSpreadsheet();
@@ -411,32 +427,49 @@ function buildDailyTotalReport(sourceTabName, reportTabName, chartTitle) {
   var lastCol = sourceSheet.getLastColumn(); // date columns run B..lastCol
   var sumToRow = Math.max(sourceSheet.getLastRow(), 2) + REPORT_ROW_PADDING;
   var numDates = lastCol - 1;
+  var tz = Session.getScriptTimeZone();
+  var numCols = 1 + WEEKDAY_NAMES.length; // Date + 7 weekday columns
 
   reportSheet.getRange(1, 1).setValue("Date").setFontWeight("bold");
-  reportSheet.getRange(1, 2).setValue("Total Quantity").setFontWeight("bold");
+  for (var w = 0; w < WEEKDAY_NAMES.length; w++) {
+    reportSheet.getRange(1, w + 2).setValue(WEEKDAY_NAMES[w]).setFontWeight("bold");
+  }
+
+  var headerDates = sourceSheet.getRange(1, 2, 1, numDates).getValues()[0];
 
   for (var i = 0; i < numDates; i++) {
     var sourceCol = i + 2;   // source column (B, C, ...)
     var reportRow = i + 2;   // report row (2, 3, ...)
     var colLetter = columnToLetter(sourceCol);
     reportSheet.getRange(reportRow, 1).setFormula("=" + sourceTabName + "!" + colLetter + "1");
-    reportSheet.getRange(reportRow, 2).setFormula(
-      "=SUM(" + sourceTabName + "!" + colLetter + "2:" + colLetter + sumToRow + ")"
-    );
+
+    var d = parseHeaderDate(headerDates[i]);
+    if (d) {
+      var weekdayCol = d.getDay() + 2; // getDay(): 0=Sunday..6=Saturday -> col B..H
+      reportSheet.getRange(reportRow, weekdayCol).setFormula(
+        "=SUM(" + sourceTabName + "!" + colLetter + "2:" + colLetter + sumToRow + ")"
+      );
+    }
   }
   reportSheet.getRange(2, 1, numDates, 1).setNumberFormat("@");
   reportSheet.setFrozenRows(1);
-  reportSheet.autoResizeColumns(1, 2);
+  reportSheet.autoResizeColumns(1, numCols);
 
-  var dataRange = reportSheet.getRange(1, 1, numDates + 1, 2);
+  var dataRange = reportSheet.getRange(1, 1, numDates + 1, numCols);
+  var seriesColors = {};
+  WEEKDAY_NAMES.forEach(function(day, idx) {
+    seriesColors[idx] = { color: WEEKDAY_COLORS[day] };
+  });
+
   var chart = reportSheet.newChart()
-    .asLineChart()
+    .asColumnChart()
     .addRange(dataRange)
-    .setPosition(2, 4, 0, 0)
+    .setPosition(2, numCols + 2, 0, 0)
     .setOption("title", chartTitle)
-    .setOption("legend", { position: "none" })
+    .setOption("legend", { position: "top" })
     .setOption("hAxis", { title: "Date", slantedText: true, textStyle: { fontSize: 9 } })
     .setOption("vAxis", { title: "Total Quantity", minValue: 0 })
+    .setOption("series", seriesColors)
     .setOption("width", 900)
     .setOption("height", 420)
     .build();
