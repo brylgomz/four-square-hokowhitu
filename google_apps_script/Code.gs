@@ -441,14 +441,22 @@ function buildDailyTotalReport(sourceTabName, reportTabName, chartTitle) {
     var sourceCol = i + 2;   // source column (B, C, ...)
     var reportRow = i + 2;   // report row (2, 3, ...)
     var colLetter = columnToLetter(sourceCol);
-    reportSheet.getRange(reportRow, 1).setFormula("=" + sourceTabName + "!" + colLetter + "1");
 
     var d = parseHeaderDate(headerDates[i]);
     if (d) {
+      var weekdayLabel = WEEKDAY_NAMES[d.getDay()];
+      // Prefix the weekday name onto the date itself (e.g. "Monday,
+      // 14/09/2026") so it's readable directly on the chart's axis, not
+      // only implied by the bar's color/legend.
+      reportSheet.getRange(reportRow, 1).setFormula(
+        "=\"" + weekdayLabel + ", \"&" + sourceTabName + "!" + colLetter + "1"
+      );
       var weekdayCol = d.getDay() + 2; // getDay(): 0=Sunday..6=Saturday -> col B..H
       reportSheet.getRange(reportRow, weekdayCol).setFormula(
         "=SUM(" + sourceTabName + "!" + colLetter + "2:" + colLetter + sumToRow + ")"
       );
+    } else {
+      reportSheet.getRange(reportRow, 1).setFormula("=" + sourceTabName + "!" + colLetter + "1");
     }
   }
   reportSheet.getRange(2, 1, numDates, 1).setNumberFormat("@");
